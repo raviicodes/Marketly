@@ -1,6 +1,9 @@
 package com.Marketly.MarketlyBackend.service;
 
 import com.Marketly.MarketlyBackend.entity.Category;
+import com.Marketly.MarketlyBackend.repository.CategoryRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -11,33 +14,37 @@ import java.util.Optional;
 
 @Service
 public class CategoryServiceImpl implements  CategoryService {
-    List<Category> CategoryList=new ArrayList<>();
-    @Override
+
+    private final CategoryRepository categoryRepository;
+    CategoryServiceImpl(CategoryRepository categoryRepository){
+         this.categoryRepository=categoryRepository;
+    }
+
     public List<Category> getAllCategories() {
-        return CategoryList;
+              return categoryRepository.findAll();
     }
 
     @Override
-   public   String addCategory(Category category) {
-         category.setCategoryId(CategoryList.size()+1);
-         CategoryList.add(category);
-         return "category with name : "+ category.getCategoryName()+" added successfully";
+   public  void addCategory(Category category) {
+                 try{
+                     categoryRepository.save(category);
+                 }
+                 catch(DataIntegrityViolationException e){
+                       throw new ResponseStatusException(HttpStatus.CONFLICT,"category already exists");
+                 }
     }
 
     @Override
-    public  String deleteCategory(int categoryId) {
-           if(CategoryList.removeIf(item->item.getCategoryId()==categoryId)) return "Category with categoryId : "+categoryId+" delted";
-           throw new ResponseStatusException(HttpStatus.NOT_FOUND,"category not found with the given id");
+    public void deleteCategory(long categoryId) {
+           Category existingCategory=categoryRepository.findById(categoryId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"category with given categoryId is not found"));
+           categoryRepository.delete(existingCategory);
     }
 
     @Override
-    public String updateCategory(int categoryId,Category category) {
-        Optional<Category> existingCategory = CategoryList.stream().filter(item -> item.getCategoryId() == categoryId).findFirst();
-         if(existingCategory.isPresent()){
-              existingCategory.get().setCategoryName(category.getCategoryName());
-               return "updated";
-         }
-          throw new  ResponseStatusException(HttpStatus.NOT_FOUND,"category not  found");
+    public void updateCategory(long categoryId,Category category) {
+            Category existingCategory=categoryRepository.findById(categoryId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"category with given categoryId is not found"));
+            existingCategory.setCategoryName(category.getCategoryName());
+            categoryRepository.save(existingCategory);
     }
 
 }
