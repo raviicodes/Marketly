@@ -3,13 +3,14 @@ package com.Marketly.MarketlyBackend.controller;
 import com.Marketly.MarketlyBackend.entity.Category;
 import com.Marketly.MarketlyBackend.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 
+import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class CategoryController {
@@ -22,14 +23,18 @@ public class CategoryController {
       }
       @PostMapping("/admin/category")
       public ResponseEntity<String> addCategory(@RequestBody Category category){
-          String msg=categoryService.addCategory(category);
-           return new ResponseEntity<>(msg,HttpStatus.CREATED);
+          try{
+              categoryService.addCategory(category);
+               return new ResponseEntity<>("category added successfully",HttpStatus.CREATED);
+          } catch (ResponseStatusException e) {
+                return new ResponseEntity<>(e.getReason(),e.getStatusCode());
+          }
       }
       @DeleteMapping("/admin/category/{categoryId}")
       public ResponseEntity<?>deleteCategory(@PathVariable int categoryId ){
             try{
-                String msg=categoryService.deleteCategory(categoryId);
-                 return new ResponseEntity<>(msg,HttpStatus.OK);
+                  categoryService.deleteCategory(categoryId);
+                  return new ResponseEntity<>("category with  categoryId : " + categoryId +" deleted!",HttpStatus.OK);
             } catch (ResponseStatusException e) {
                 return new ResponseEntity<>(e.getReason(),e.getStatusCode());
             }
@@ -37,8 +42,8 @@ public class CategoryController {
         @PutMapping("/admin/category/{id}")
         public  ResponseEntity<String> updateCategory(@PathVariable int id,@RequestBody Category category){
                 try{
-                     String msg=categoryService.updateCategory(id,category);
-                      return new ResponseEntity<>(msg,HttpStatus.OK);
+                      categoryService.updateCategory(id,category);
+                      return new ResponseEntity<>("category with  categoryId : " + id +" updated!",HttpStatus.OK);
                 }
                 catch (ResponseStatusException e){
                      return new ResponseEntity<>(e.getReason(),e.getStatusCode());

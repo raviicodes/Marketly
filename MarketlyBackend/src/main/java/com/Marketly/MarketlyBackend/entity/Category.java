@@ -1,7 +1,14 @@
 package com.Marketly.MarketlyBackend.entity;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "categories")
 public class Category {
-    public  int categoryId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public  long categoryId;
+    @Column(nullable = false,unique = true)
     public String categoryName;
 
     public String getCategoryName() {
@@ -12,11 +19,11 @@ public class Category {
         this.categoryName = categoryName;
     }
 
-    public int getCategoryId() {
+    public long getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(int categoryId) {
+    public void setCategoryId(long categoryId) {
         this.categoryId = categoryId;
     }
 }
