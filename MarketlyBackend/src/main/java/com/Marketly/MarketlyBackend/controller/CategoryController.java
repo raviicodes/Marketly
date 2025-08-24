@@ -2,6 +2,7 @@ package com.Marketly.MarketlyBackend.controller;
 
 import com.Marketly.MarketlyBackend.entity.Category;
 import com.Marketly.MarketlyBackend.service.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class CategoryController {
            return new ResponseEntity<>(allCategories,HttpStatus.OK);
       }
       @PostMapping("/admin/category")
-      public ResponseEntity<String> addCategory(@RequestBody Category category){
+      public ResponseEntity<String> addCategory(@Valid @RequestBody Category category){
           try{
               categoryService.addCategory(category);
                return new ResponseEntity<>("category added successfully",HttpStatus.CREATED);
@@ -40,7 +41,7 @@ public class CategoryController {
             }
         }
         @PutMapping("/admin/category/{id}")
-        public  ResponseEntity<String> updateCategory(@PathVariable int id,@RequestBody Category category){
+        public  ResponseEntity<String> updateCategory(@PathVariable int id, @Valid @RequestBody Category category){
                 try{
                       categoryService.updateCategory(id,category);
                       return new ResponseEntity<>("category with  categoryId : " + id +" updated!",HttpStatus.OK);
