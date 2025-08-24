@@ -1,6 +1,7 @@
 package com.Marketly.MarketlyBackend.service;
 
 import com.Marketly.MarketlyBackend.entity.Category;
+import com.Marketly.MarketlyBackend.exceptions.ResourceNotFoundException;
 import com.Marketly.MarketlyBackend.repository.CategoryRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -36,13 +37,13 @@ public class CategoryServiceImpl implements  CategoryService {
 
     @Override
     public void deleteCategory(long categoryId) {
-           Category existingCategory=categoryRepository.findById(categoryId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"category with given categoryId is not found"));
+           Category existingCategory=categoryRepository.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category","categoryId",categoryId));
            categoryRepository.delete(existingCategory);
     }
 
     @Override
     public void updateCategory(long categoryId,Category category) {
-            Category existingCategory=categoryRepository.findById(categoryId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"category with given categoryId is not found"));
+            Category existingCategory=categoryRepository.findById(categoryId).orElseThrow(()->new ResourceNotFoundException("Category","categoryId",categoryId));
             existingCategory.setCategoryName(category.getCategoryName());
             categoryRepository.save(existingCategory);
     }
