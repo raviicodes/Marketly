@@ -24,30 +24,20 @@ public class CategoryController {
       }
       @PostMapping("/admin/category")
       public ResponseEntity<String> addCategory(@Valid @RequestBody Category category){
-          try{
               categoryService.addCategory(category);
                return new ResponseEntity<>("category added successfully",HttpStatus.CREATED);
-          } catch (ResponseStatusException e) {
-                return new ResponseEntity<>(e.getReason(),e.getStatusCode());
-          }
+
       }
       @DeleteMapping("/admin/category/{categoryId}")
       public ResponseEntity<?>deleteCategory(@PathVariable int categoryId ){
-            try{
+
                   categoryService.deleteCategory(categoryId);
                   return new ResponseEntity<>("category with  categoryId : " + categoryId +" deleted!",HttpStatus.OK);
-            } catch (ResponseStatusException e) {
-                return new ResponseEntity<>(e.getReason(),e.getStatusCode());
-            }
+
         }
         @PutMapping("/admin/category/{id}")
         public  ResponseEntity<String> updateCategory(@PathVariable int id, @Valid @RequestBody Category category){
-                try{
                       categoryService.updateCategory(id,category);
                       return new ResponseEntity<>("category with  categoryId : " + id +" updated!",HttpStatus.OK);
-                }
-                catch (ResponseStatusException e){
-                     return new ResponseEntity<>(e.getReason(),e.getStatusCode());
-                }
         }
 }

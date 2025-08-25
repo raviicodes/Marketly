@@ -1,6 +1,7 @@
 package com.Marketly.MarketlyBackend.service;
 
 import com.Marketly.MarketlyBackend.entity.Category;
+import com.Marketly.MarketlyBackend.exceptions.ApiException;
 import com.Marketly.MarketlyBackend.exceptions.ResourceNotFoundException;
 import com.Marketly.MarketlyBackend.repository.CategoryRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,12 +28,9 @@ public class CategoryServiceImpl implements  CategoryService {
 
     @Override
    public  void addCategory(Category category) {
-                 try{
-                     categoryRepository.save(category);
-                 }
-                 catch(DataIntegrityViolationException e){
-                       throw new ResponseStatusException(HttpStatus.CONFLICT,"category already exists");
-                 }
+             Optional<Category> existingCategory= categoryRepository.findByCategoryName(category.getCategoryName());
+             if(existingCategory.isPresent()) throw new ApiException("Category with the categoryName : "+ category.getCategoryName() + "already exists");
+             categoryRepository.save(category);
     }
 
     @Override
