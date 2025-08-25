@@ -2,6 +2,7 @@ package com.Marketly.MarketlyBackend.controller;
 
 import com.Marketly.MarketlyBackend.entity.Category;
 import com.Marketly.MarketlyBackend.service.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -22,31 +23,21 @@ public class CategoryController {
            return new ResponseEntity<>(allCategories,HttpStatus.OK);
       }
       @PostMapping("/admin/category")
-      public ResponseEntity<String> addCategory(@RequestBody Category category){
-          try{
+      public ResponseEntity<String> addCategory(@Valid @RequestBody Category category){
               categoryService.addCategory(category);
                return new ResponseEntity<>("category added successfully",HttpStatus.CREATED);
-          } catch (ResponseStatusException e) {
-                return new ResponseEntity<>(e.getReason(),e.getStatusCode());
-          }
+
       }
       @DeleteMapping("/admin/category/{categoryId}")
       public ResponseEntity<?>deleteCategory(@PathVariable int categoryId ){
-            try{
+
                   categoryService.deleteCategory(categoryId);
                   return new ResponseEntity<>("category with  categoryId : " + categoryId +" deleted!",HttpStatus.OK);
-            } catch (ResponseStatusException e) {
-                return new ResponseEntity<>(e.getReason(),e.getStatusCode());
-            }
+
         }
         @PutMapping("/admin/category/{id}")
-        public  ResponseEntity<String> updateCategory(@PathVariable int id,@RequestBody Category category){
-                try{
+        public  ResponseEntity<String> updateCategory(@PathVariable int id, @Valid @RequestBody Category category){
                       categoryService.updateCategory(id,category);
                       return new ResponseEntity<>("category with  categoryId : " + id +" updated!",HttpStatus.OK);
-                }
-                catch (ResponseStatusException e){
-                     return new ResponseEntity<>(e.getReason(),e.getStatusCode());
-                }
         }
 }
