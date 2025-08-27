@@ -1,2 +1,2 @@
 # Marketly
-Fullstack Ecommerce Application using SpringBoot and React
+Fullstack Ecommerce backend using SpringBoot
