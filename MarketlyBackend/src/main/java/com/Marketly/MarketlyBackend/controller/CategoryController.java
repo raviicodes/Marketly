@@ -20,10 +20,12 @@ public class CategoryController {
       public ResponseEntity<CategoryResponseDTO> getAllCategoryies
               (
               @RequestParam(name = "pageNumber",defaultValue = DefaultValues.pageNumber,required = false) Integer pageNumber,
-              @RequestParam(name = "pageSize",defaultValue = DefaultValues.pageSize,required = false)Integer pageSize
+              @RequestParam(name = "pageSize",defaultValue = DefaultValues.pageSize,required = false)Integer pageSize,
+              @RequestParam(name="sortBy",defaultValue = DefaultValues.SORT_CATEGORIES_BY,required = false) String sortBy,
+              @RequestParam(name="sortOrder",defaultValue = DefaultValues.SORT_ORDER,required = false) String sortOrder
              )
       {
-         CategoryResponseDTO response =categoryService.getAllCategories(pageNumber,pageSize);
+         CategoryResponseDTO response =categoryService.getAllCategories(pageNumber,pageSize,sortBy,sortOrder);
            return new ResponseEntity<>(response,HttpStatus.OK);
       }
 
