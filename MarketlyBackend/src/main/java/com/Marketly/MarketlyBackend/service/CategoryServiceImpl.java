@@ -9,6 +9,10 @@ import com.Marketly.MarketlyBackend.repository.CategoryRepository;
 import org.modelmapper.ModelMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -23,11 +27,21 @@ public class CategoryServiceImpl implements  CategoryService {
          this.categoryRepository=categoryRepository;
     }
 
-    public CategoryResponseDTO getAllCategories() {
-               List<Category>categoryList=categoryRepository.findAll();
-               if(categoryList.isEmpty()) throw  new ApiException("No Category created till now!!");
-              List<CategoryRequestDTO> response=categoryList.stream().map(category -> modelMapper.map(category,CategoryRequestDTO.class)).toList();
-              return new CategoryResponseDTO(response);
+    public CategoryResponseDTO getAllCategories(Integer pageNumber,Integer pageSize,String sortBy,String sortOder) {
+        Sort sortbyAndOrder=sortOder.equalsIgnoreCase("asc")?Sort.by(sortBy).ascending():Sort.by(sortBy).descending();
+        Pageable pageDetails=PageRequest.of(pageNumber,pageSize,sortbyAndOrder);
+        Page<Category> paginatedData = categoryRepository.findAll(pageDetails);
+        List<Category> paginatedCategory = paginatedData.getContent();
+        if(paginatedCategory.isEmpty()) throw  new ApiException("No Category created till now!!");
+        List<CategoryRequestDTO> categoryList=paginatedCategory.stream().map(category -> modelMapper.map(category,CategoryRequestDTO.class)).toList();
+         CategoryResponseDTO response=new CategoryResponseDTO();
+         response.setContent(categoryList);
+         response.setTotalElements(paginatedData.getNumberOfElements());
+         response.setTotalPage(paginatedData.getTotalPages());
+         response.setLastPage(paginatedData.isLast());
+         response.setPageSize(pageSize);
+         response.setPageNumber(pageNumber);
+         return response;
     }
 
     @Override
