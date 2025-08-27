@@ -1,13 +1,15 @@
 package com.Marketly.MarketlyBackend.service;
 
 import com.Marketly.MarketlyBackend.entity.Category;
+import com.Marketly.MarketlyBackend.payload.CategoryRequestDTO;
+import com.Marketly.MarketlyBackend.payload.CategoryResponseDTO;
 
 import java.util.List;
 
 
 public interface CategoryService {
-       List<Category>getAllCategories();
-      void addCategory(Category category);
-      void deleteCategory(long categoryId);
-      void updateCategory(long categoryId,Category category);
+        CategoryResponseDTO getAllCategories();
+       CategoryRequestDTO addCategory(CategoryRequestDTO categoryRequestDTO);
+       CategoryRequestDTO deleteCategory(long categoryId);
+      CategoryRequestDTO updateCategory(long categoryId,CategoryRequestDTO categoryRequestDTO);
 }

@@ -1,14 +1,14 @@
 package com.Marketly.MarketlyBackend.controller;
 
 import com.Marketly.MarketlyBackend.entity.Category;
+import com.Marketly.MarketlyBackend.payload.CategoryRequestDTO;
+import com.Marketly.MarketlyBackend.payload.CategoryResponseDTO;
 import com.Marketly.MarketlyBackend.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.List;
@@ -18,26 +18,28 @@ public class CategoryController {
     @Autowired
        CategoryService categoryService;
       @GetMapping("/public/categories")
-      public ResponseEntity<List<Category>> getAllCategoryies(){
-          List<Category>allCategories=categoryService.getAllCategories();
-           return new ResponseEntity<>(allCategories,HttpStatus.OK);
+      public ResponseEntity<CategoryResponseDTO> getAllCategoryies(){
+         CategoryResponseDTO response =categoryService.getAllCategories();
+           return new ResponseEntity<>(response,HttpStatus.OK);
       }
+
       @PostMapping("/admin/category")
-      public ResponseEntity<String> addCategory(@Valid @RequestBody Category category){
-              categoryService.addCategory(category);
-               return new ResponseEntity<>("category added successfully",HttpStatus.CREATED);
+      public ResponseEntity<CategoryRequestDTO> addCategory(@Valid @RequestBody CategoryRequestDTO categoryRequestDTO){
+              CategoryRequestDTO savedCategory=  categoryService.addCategory(categoryRequestDTO);
+               return new ResponseEntity<>(savedCategory,HttpStatus.CREATED);
 
       }
       @DeleteMapping("/admin/category/{categoryId}")
-      public ResponseEntity<?>deleteCategory(@PathVariable int categoryId ){
+      public ResponseEntity<CategoryRequestDTO>deleteCategory(@PathVariable int categoryId ){
 
-                  categoryService.deleteCategory(categoryId);
-                  return new ResponseEntity<>("category with  categoryId : " + categoryId +" deleted!",HttpStatus.OK);
+                CategoryRequestDTO deletedCategoryDTO=  categoryService.deleteCategory(categoryId);
+                  return new ResponseEntity<>(deletedCategoryDTO,HttpStatus.OK);
 
         }
         @PutMapping("/admin/category/{id}")
-        public  ResponseEntity<String> updateCategory(@PathVariable int id, @Valid @RequestBody Category category){
-                      categoryService.updateCategory(id,category);
-                      return new ResponseEntity<>("category with  categoryId : " + id +" updated!",HttpStatus.OK);
+        public  ResponseEntity<CategoryRequestDTO> updateCategory(@PathVariable int id, @Valid @RequestBody CategoryRequestDTO categoryRequestDTO){
+                 CategoryRequestDTO updateCategoryDTO=      categoryService.updateCategory(id,categoryRequestDTO);
+                      return new ResponseEntity<>(updateCategoryDTO,HttpStatus.OK);
         }
+
 }
