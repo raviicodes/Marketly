@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.action.internal.OrphanRemovalAction;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +16,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private  Long productId;
     @NotBlank
-    @Size(min =3,max = 15)
+    @Size(min =3,max = 30)
     private String productName;
     private Long quantity;
     private Long price;
