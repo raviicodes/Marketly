@@ -1,6 +1,6 @@
 package com.Marketly.MarketlyBackend.controller;
 
-import com.Marketly.MarketlyBackend.config.DefaultValues;
+import com.Marketly.MarketlyBackend.config.DefaultValues;;
 import com.Marketly.MarketlyBackend.payload.ProductDTO;
 import com.Marketly.MarketlyBackend.payload.ProductResponseDTO;
 import com.Marketly.MarketlyBackend.service.ProductService;
@@ -25,10 +25,25 @@ public class ProductController {
          ProductResponseDTO productResponseDTO=productService.getProducts(pageNumber,pageSize,sortBy,sortOrder);
          return new ResponseEntity<>(productResponseDTO,HttpStatus.OK);
     }
+    @GetMapping("/public/categories/{categoryId}/products")
+     public ResponseEntity<ProductResponseDTO> getProductsByCategoryId(@PathVariable Long categoryId){
+        ProductResponseDTO response=productService.getProductsByCategoryId(categoryId);
+         return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+    @GetMapping("/public/products/keyword/{keyword}")
+    public ResponseEntity<ProductResponseDTO> getProductsByKeyword(@PathVariable String keyword){
+        ProductResponseDTO response=productService.getProductsByKeyword(keyword);
+         return new ResponseEntity<>(response,HttpStatus.FOUND);
+    }
      @PostMapping("/admin/categories/{categoryId}/product")
      public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO product, @PathVariable Long categoryId){
             ProductDTO savedProduct=productService.addProduct(product,categoryId);
              return  new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
      }
 
+      @PutMapping("/admin/products/{productId}")
+     public ResponseEntity<ProductDTO> updateProduct(@RequestBody ProductDTO product,@PathVariable Long productId){
+          ProductDTO productDTO = productService.updateProduct(product, productId);
+          return new ResponseEntity<>(productDTO,HttpStatus.OK);
+      }
 }
