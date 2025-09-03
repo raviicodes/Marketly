@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,8 +16,6 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private  Long productId;
-    @NotBlank
-    @Size(min =3,max = 30)
     private String productName;
     private Long quantity;
     private Long price;
