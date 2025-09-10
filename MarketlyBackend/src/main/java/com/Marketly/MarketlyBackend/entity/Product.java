@@ -27,4 +27,7 @@ public class Product {
      @ManyToOne
      @JoinColumn(name = "category_Id")
      private Category category;
+     @ManyToOne
+      @JoinColumn(name = "seller_Id")
+     private User user;
 }
