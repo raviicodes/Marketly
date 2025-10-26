@@ -34,7 +34,7 @@ public class User {
     private String password;
     @Email(message = "email should be valid")
     private String email;
-    public User(String password, String email, String userName) {
+    public User(String userName,String email, String password) {
         this.password = password;
         this.email = email;
         this.userName = userName;
