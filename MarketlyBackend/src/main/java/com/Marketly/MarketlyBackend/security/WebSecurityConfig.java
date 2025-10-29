@@ -47,7 +47,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,AuthTokenFilter authTokenFilter) throws Exception {
         http.authorizeHttpRequests((request)->
-                request.requestMatchers("/api/auth/**","/api/public/**").permitAll()
+                request.requestMatchers("/api/auth/signup","/api/auth/signin").permitAll()
                         .anyRequest().authenticated()
         );
         http.csrf(AbstractHttpConfigurer::disable);

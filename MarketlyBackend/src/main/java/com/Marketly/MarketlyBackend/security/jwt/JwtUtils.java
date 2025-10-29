@@ -1,17 +1,21 @@
 package com.Marketly.MarketlyBackend.security.jwt;
 
+import com.Marketly.MarketlyBackend.security.services.UserDetailsImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.WebUtils;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -23,19 +27,34 @@ public class JwtUtils {
     private long jwtExpirationMS;
     @Value("${spring.app.jwtsecret}")
       private String jwtsecret;
+     @Value("${spring.app.jwtToken}")
+    private String  jwtToken;
     private static final Logger logger= LoggerFactory.getLogger(JwtUtils.class);
 
     // get the token from the 'Authorization' header
-     public String getTokenFromHeader(HttpServletRequest request){
-             String bearerToken=request.getHeader("Authorization");
-              if(bearerToken!=null && bearerToken.startsWith("Bearer ")){
-                   return bearerToken.substring(7);
-              }
-              else return null;
-     }
-     // Generate token from username.
-    public String generateToken(UserDetails user){
-          String userName=user.getUsername();
+//     public String getTokenFromHeader(HttpServletRequest request){
+//             String bearerToken=request.getHeader("Authorization");
+//              if(bearerToken!=null && bearerToken.startsWith("Bearer ")){
+//                   return bearerToken.substring(7);
+//              }
+//              else return null;
+//     }
+
+    // get token from cookies
+    public String getTokenFromCookies(HttpServletRequest request){
+      Cookie cookie= WebUtils.getCookie(request,jwtToken);
+       return cookie==null?null:cookie.getValue();
+    }
+    //
+    public ResponseCookie generateJwtCookie(UserDetailsImpl userDetails){
+           String jwt=generateToken(userDetails.getUsername());
+          return ResponseCookie.from(jwtToken,jwt).path("/api").maxAge(24*60*60).httpOnly(false).build();
+    }
+    public ResponseCookie logoutResponseCookie(){
+        return ResponseCookie.from(jwtToken,null).path("/api").httpOnly(false).build();
+    }
+     // Generate token from username
+    public String generateToken(String userName){
           return Jwts.builder().subject(userName).issuedAt(new Date()).expiration(new Date(new Date().getTime()+jwtExpirationMS)).signWith(key()).compact();
     }
     // Get userName form token
@@ -54,11 +73,7 @@ public class JwtUtils {
             Jwts.parser().verifyWith((SecretKey) key()).build().parseSignedClaims(token);
             return true;
         }
-        catch(MalformedJwtException e){
-            logger.debug("Invalid jwt token: {}",e.getMessage());
-
-        }
-        catch(ExpiredJwtException e){
+        catch(MalformedJwtException | ExpiredJwtException e){
             logger.debug("Invalid jwt token: {}",e.getMessage());
 
         }
