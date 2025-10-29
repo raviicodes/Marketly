@@ -1,7 +1,8 @@
 package com.Marketly.MarketlyBackend.entity;
 
 public enum AppRole {
-    Role_User,
-    Role_Admin,
-    Role_Seller
-}
+    ROLE_USER,
+    ROLE_ADMIN,
+    ROLE_SELLER
+
+    }

@@ -14,13 +14,13 @@ import com.Marketly.MarketlyBackend.security.jwt.JwtUtils;
 import com.Marketly.MarketlyBackend.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -54,9 +54,9 @@ public class AuthController {
          SecurityContextHolder.getContext().setAuthentication(authentication);
          UserDetailsImpl userDetails= (UserDetailsImpl) authentication.getPrincipal();
          List<String>roles=userDetails.getAuthorities().stream().map(item->item.getAuthority()).toList();
-         String token=jwtUtils.generateToken(userDetails);
-          LoginResponse loginResponse=new LoginResponse(userDetails.getUsername(),roles,token);
-          return new ResponseEntity<>(loginResponse, HttpStatus.OK);
+         ResponseCookie cookieToken=jwtUtils.generateJwtCookie(userDetails);
+          LoginResponse loginResponse=new LoginResponse(userDetails.getUsername(),roles);
+          return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,cookieToken.toString()).body(loginResponse);
     }
     @PostMapping("/signup")
     public ResponseEntity<?>userSignUp(@Valid @RequestBody SignUpRequest signUpRequest){
@@ -70,27 +70,27 @@ public class AuthController {
         Set<String>strRoles=signUpRequest.getRoles();
         Set<Role>roles=new HashSet<>();
          if(strRoles==null){
-             Role role=roleRepository.findByRoleName(AppRole.Role_User).orElseThrow(()->new RuntimeException("Role_User not found"));
+             Role role=roleRepository.findByRoleName(AppRole.ROLE_USER).orElseThrow(()->new RuntimeException("Role_User not found"));
              roles.add(role);
          }
          else {
              strRoles.forEach(role -> {
                  switch (role) {
                      case "admin":
-                         Role roleAdmin = roleRepository.findByRoleName(AppRole.Role_Admin)
-                                 .orElseThrow(() -> new RuntimeException("Error: " + AppRole.Role_Admin + " not found in DB"));
+                         Role roleAdmin = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
+                                 .orElseThrow(() -> new RuntimeException("Error: " + AppRole.ROLE_ADMIN + " not found in DB"));
                          roles.add(roleAdmin);
                          break;
 
                      case "seller":
-                         Role roleSeller = roleRepository.findByRoleName(AppRole.Role_Seller)
-                                 .orElseThrow(() -> new RuntimeException("Error: " + AppRole.Role_Seller + " not found in DB"));
+                         Role roleSeller = roleRepository.findByRoleName(AppRole.ROLE_SELLER)
+                                 .orElseThrow(() -> new RuntimeException("Error: " + AppRole.ROLE_SELLER + " not found in DB"));
                          roles.add(roleSeller);
                          break;
 
                      default:
-                         Role roleUser = roleRepository.findByRoleName(AppRole.Role_User)
-                                 .orElseThrow(() -> new RuntimeException("Error: " + AppRole.Role_User + " not found in DB"));
+                         Role roleUser = roleRepository.findByRoleName(AppRole.ROLE_USER)
+                                 .orElseThrow(() -> new RuntimeException("Error: " + AppRole.ROLE_USER + " not found in DB"));
                          roles.add(roleUser);
                          break;
                  }
@@ -101,5 +101,13 @@ public class AuthController {
         userRepository.save(user);
         return ResponseEntity.ok().body(new MessageResponse("User registered"));
     }
-
+     @GetMapping("/userName")
+    public  ResponseEntity<?> getUserName(Authentication authentication){
+             return ResponseEntity.ok().body(authentication.getPrincipal());
+     }
+     @GetMapping("/signOut")
+    public ResponseEntity<?>signOut(){
+           ResponseCookie signOutCookie=jwtUtils.logoutResponseCookie();
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,signOutCookie.toString()).body("loggedout");
+     }
 }
