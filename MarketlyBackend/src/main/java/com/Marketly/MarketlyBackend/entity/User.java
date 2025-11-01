@@ -50,6 +50,7 @@ public class User {
     Set<Role> role=new HashSet<>();
     @ToString.Exclude
     @OneToMany(
+            mappedBy = "user",
             cascade = {CascadeType.PERSIST,CascadeType.MERGE},
             orphanRemoval = true
     )
@@ -60,6 +61,5 @@ public class User {
              inverseJoinColumns = @JoinColumn(name = "address_id")
      )
     List<Address> addresses=new ArrayList<>();
-
 
 }

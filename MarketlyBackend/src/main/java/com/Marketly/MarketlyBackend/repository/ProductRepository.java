@@ -1,5 +1,6 @@
 package com.Marketly.MarketlyBackend.repository;
 
+import com.Marketly.MarketlyBackend.entity.Category;
 import com.Marketly.MarketlyBackend.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,4 +14,5 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product,Long> {
     Page<Product> findAllByCategory_CategoryId(Long categoryId, Pageable pageable);
     Page<Product> findByProductNameContainingIgnoreCase(String keyword,Pageable pageable);
+    boolean existsByProductNameAndCategory(String productName, Category category);
 }
