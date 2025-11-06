@@ -33,6 +33,7 @@ public class ProductServiceImpl implements ProductService{
     private ModelMapper modelMapper;
     @Autowired
     CategoryRepository categoryRepository;
+    @Autowired
     private UserRepository userRepository;
 
     @Override
@@ -66,7 +67,6 @@ public class ProductServiceImpl implements ProductService{
         product.setCategory(category);
         product.setSpecialPrice(DefaultValues.getSpecialPrice(productDTO.getPrice(),productDTO.getDiscount()));
         product.setUser(seller);
-        seller.getProducts().add(product);
         Product savedProduct=productRepository.save(product);
          return modelMapper.map(savedProduct,ProductDTO.class);
     }
@@ -144,5 +144,24 @@ public class ProductServiceImpl implements ProductService{
          productInDB.setImage(fileName);
          Product updatedProductwithImage=productRepository.save(productInDB);
           return modelMapper.map(updatedProductwithImage,ProductDTO.class);
+    }
+
+    @Override
+    public ProductResponseDTO getProductBySeller(String sellerName, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortingDetails=sortBy.equalsIgnoreCase("asc")?Sort.by(sortOrder).ascending():Sort.by(sortOrder).descending();
+        Pageable pageable=PageRequest.of(pageNumber,pageSize,sortingDetails);
+        Page<Product>productList=productRepository.findByUser_UserName(sellerName,pageable);
+        List<Product>products=productList.getContent();
+        if(products.isEmpty()) throw new ApiException("No products created till now with sellername : "+sellerName);
+        List<ProductDTO> productDTO = products.stream().map(elements -> modelMapper.map(elements, ProductDTO.class)).toList();
+        ProductResponseDTO response=new ProductResponseDTO();
+        response.setContent(productDTO);
+        response.setPageNumber(pageNumber);
+        response.setTotalPage(productList.getTotalPages());
+        response.setTotalElements(productList.getNumberOfElements());
+        response.setPageSize(productList.getSize());
+        response.setLastPage(productList.isLast());
+        response.setTotalPage(productList.getTotalPages());
+        return response;
     }
 }

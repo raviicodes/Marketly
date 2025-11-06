@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class CategoryController {
     @Autowired
        CategoryService categoryService;
-      @GetMapping("/public/categories")
+      @GetMapping("/categories")
       public ResponseEntity<CategoryResponseDTO> getAllCategoryies
               (
               @RequestParam(name = "pageNumber",defaultValue = DefaultValues.pageNumber,required = false) Integer pageNumber,
@@ -28,21 +29,23 @@ public class CategoryController {
          CategoryResponseDTO response =categoryService.getAllCategories(pageNumber,pageSize,sortBy,sortOrder);
            return new ResponseEntity<>(response,HttpStatus.OK);
       }
-
-      @PostMapping("/admin/category")
+      @PreAuthorize("hasRole('ADMIN')")
+      @PostMapping("/category")
       public ResponseEntity<CategoryRequestDTO> addCategory(@Valid @RequestBody CategoryRequestDTO categoryRequestDTO){
               CategoryRequestDTO savedCategory=  categoryService.addCategory(categoryRequestDTO);
                return new ResponseEntity<>(savedCategory,HttpStatus.CREATED);
 
       }
-      @DeleteMapping("/admin/category/{categoryId}")
+      @PreAuthorize("hasRole('ADMIN')")
+      @DeleteMapping("/category/{categoryId}")
       public ResponseEntity<CategoryRequestDTO>deleteCategory(@PathVariable int categoryId ){
 
                 CategoryRequestDTO deletedCategoryDTO=  categoryService.deleteCategory(categoryId);
                   return new ResponseEntity<>(deletedCategoryDTO,HttpStatus.OK);
 
         }
-        @PutMapping("/admin/category/{id}")
+        @PreAuthorize("hasRole('ADMIN')")
+        @PutMapping("/category/{id}")
         public  ResponseEntity<CategoryRequestDTO> updateCategory(@PathVariable int id, @Valid @RequestBody CategoryRequestDTO categoryRequestDTO){
                  CategoryRequestDTO updateCategoryDTO=      categoryService.updateCategory(id,categoryRequestDTO);
                       return new ResponseEntity<>(updateCategoryDTO,HttpStatus.OK);

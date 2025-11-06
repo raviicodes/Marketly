@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,7 +31,7 @@ public class ProductController {
          ProductResponseDTO productResponseDTO=productService.getProducts(pageNumber,pageSize,sortBy,sortOrder);
          return new ResponseEntity<>(productResponseDTO,HttpStatus.OK);
     }
-    @GetMapping("/categories/{categoryId}/products")
+    @GetMapping("/products/category/{categoryId}")
      public ResponseEntity<ProductResponseDTO> getProductsByCategoryId(@PathVariable Long categoryId,
                                                                        @RequestParam(name = "pageNumber",defaultValue = DefaultValues.pageNumber,required = false) Integer pageNumber,
                                                                        @RequestParam(name="pageSize",defaultValue = DefaultValues.pageSize,required = false)Integer pageSize,
@@ -51,15 +52,15 @@ public class ProductController {
          return new ResponseEntity<>(response,HttpStatus.FOUND);
     }
      @PreAuthorize("hasRole('SELLER')")
-     @PostMapping("/{categoryId}/product")
+     @PostMapping("/product/category/{categoryId}")
      public ResponseEntity<ProductDTO> addProduct(@Valid @RequestBody ProductDTO product, @PathVariable Long categoryId){
              String sellerName= SecurityContextHolder.getContext().getAuthentication().getName();
              ProductDTO savedProduct=productService.addProduct(product,categoryId,sellerName);
              return  new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
      }
       @PreAuthorize("hasRole('SELLER')")
-      @PutMapping("/products/{productId}")
-     public ResponseEntity<ProductDTO> updateProduct(@Valid @RequestBody ProductDTO product, @PathVariable Long productId){
+      @PutMapping("/product/{productId}")
+     public ResponseEntity<ProductDTO> updateProduct( @RequestBody ProductDTO product, @PathVariable Long productId){
           ProductDTO productDTO = productService.updateProduct(product, productId);
           return new ResponseEntity<>(productDTO,HttpStatus.OK);
       }
@@ -74,5 +75,17 @@ public class ProductController {
      public ResponseEntity<ProductDTO> updateImageOfProduct(@PathVariable Long productId, @RequestParam("image")MultipartFile image) throws IOException {
                     ProductDTO productDTO=productService.updateImage(productId,image);
                     return new ResponseEntity<>(productDTO,HttpStatus.OK);
+      }
+
+      @PreAuthorize("hasRole('SELLER')")
+      @GetMapping("/products/seller/")
+      public ResponseEntity<?>getAllProductsBySeller( @RequestParam(name = "pageNumber",defaultValue = DefaultValues.pageNumber,required = false) Integer pageNumber,
+                                                      @RequestParam(name="pageSize",defaultValue = DefaultValues.pageSize,required = false)Integer pageSize,
+                                                      @RequestParam(name="sortOrder",defaultValue = DefaultValues.SORT_ORDER,required = false) String sortOrder,
+                                                      @RequestParam(name = "sortBy",defaultValue = DefaultValues.SORT_PRODUCT_BY,required = false) String sortBy
+      ){
+        String sellerName= SecurityContextHolder.getContext().getAuthentication().getName();
+        ProductResponseDTO productResponseDTO=productService.getProductBySeller(sellerName,pageNumber,pageSize,sortBy,sortOrder);
+        return ResponseEntity.ok().body(productResponseDTO);
       }
 }

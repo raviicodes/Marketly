@@ -26,6 +26,7 @@ public class Product {
     private String image;
     private Long discount;
     private Long stocks;
+    private String brandName;
      @ToString.Exclude
      @ManyToOne
      @JoinColumn(name = "category_id")
@@ -33,5 +34,4 @@ public class Product {
      @ManyToOne
     @JoinColumn(name = "seller_id")
     private User user;
-
 }
