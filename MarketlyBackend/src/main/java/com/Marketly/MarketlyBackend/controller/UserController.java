@@ -3,6 +3,8 @@ package com.Marketly.MarketlyBackend.controller;
 import com.Marketly.MarketlyBackend.entity.AppRole;
 import com.Marketly.MarketlyBackend.entity.Role;
 import com.Marketly.MarketlyBackend.entity.User;
+import com.Marketly.MarketlyBackend.payload.AddressDTO;
+import com.Marketly.MarketlyBackend.payload.AddressResponseDTO;
 import com.Marketly.MarketlyBackend.payload.AllUserDTO;
 import com.Marketly.MarketlyBackend.payload.LoginResponse;
 import com.Marketly.MarketlyBackend.service.UserService;
@@ -10,16 +12,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 public class UserController {
     @Autowired
     private UserService userService;
@@ -52,6 +51,21 @@ public class UserController {
              User user=userService.getUserById(userId);
                LoginResponse response=mapper.map(user,LoginResponse.class);
               return ResponseEntity.ok().body(response);
+      }
+      @GetMapping("/address")
+    public ResponseEntity<?>getUserAddresses(){
+           AddressResponseDTO addresses=userService.getAllAddress();
+           return ResponseEntity.ok().body(addresses);
+      }
+      @PostMapping("/address")
+      public ResponseEntity<?>addAddress(@RequestBody AddressDTO address){
+           AddressResponseDTO savedAddress=userService.addAddress(address);
+            return ResponseEntity.ok().body(savedAddress);
+      }
+      @DeleteMapping("/address/{addressId}")
+    public ResponseEntity<?>deleteAddress(@PathVariable long addressId){
+            AddressDTO deletedAddress=userService.deleteAddress(addressId);
+            return ResponseEntity.ok().body(deletedAddress);
       }
 
 }
