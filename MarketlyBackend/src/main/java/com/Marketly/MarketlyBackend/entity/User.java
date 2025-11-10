@@ -50,16 +50,16 @@ public class User {
     Set<Role> role=new HashSet<>();
     @ToString.Exclude
     @OneToMany(
+            mappedBy = "user",
             cascade = {CascadeType.PERSIST,CascadeType.MERGE},
             orphanRemoval = true
     )
     private Set<Product>products=new HashSet<>();
-    @ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE})
+    @OneToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE})
      @JoinTable( name = "user_address",
               joinColumns = @JoinColumn(name="user_id"),
              inverseJoinColumns = @JoinColumn(name = "address_id")
      )
     List<Address> addresses=new ArrayList<>();
-
 
 }

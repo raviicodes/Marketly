@@ -14,7 +14,7 @@ public class ProductDTO {
     @Size(min = 3)
     @NotBlank
     private String productName;
-    private Long quantity;
+    private Long stocks;
     private Long price;
     private Long specialPrice;
     @Size(min = 6)

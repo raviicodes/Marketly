@@ -1,22 +1,15 @@
-package com.Marketly.MarketlyBackend.entity;
+package com.Marketly.MarketlyBackend.payload;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Entity
 @Data
 @NoArgsConstructor
-@ToString
-public class Address {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@AllArgsConstructor
+public class AddressDTO {
     private long addressId;
     @NotBlank
     @Size(min = 2, message = "street name should be minimum 2 characters")
@@ -33,17 +26,4 @@ public class Address {
     @NotBlank
     @Size(min = 5, message = "zip code should be minimum 5 characters")
     private String zipCode;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    @ToString.Exclude
-    private User user;
-    public Address(String street, String building, String city, String state, String zipCode) {
-        this.street = street;
-        this.building = building;
-        this.city = city;
-        this.state = state;
-        this.zipCode = zipCode;
-    }
 }
-
-

@@ -3,12 +3,15 @@ package com.Marketly.MarketlyBackend.service;
 import com.Marketly.MarketlyBackend.config.DefaultValues;
 import com.Marketly.MarketlyBackend.entity.Category;
 import com.Marketly.MarketlyBackend.entity.Product;
+import com.Marketly.MarketlyBackend.entity.User;
 import com.Marketly.MarketlyBackend.exceptions.ApiException;
 import com.Marketly.MarketlyBackend.exceptions.ResourceNotFoundException;
 import com.Marketly.MarketlyBackend.payload.ProductDTO;
 import com.Marketly.MarketlyBackend.payload.ProductResponseDTO;
 import com.Marketly.MarketlyBackend.repository.CategoryRepository;
 import com.Marketly.MarketlyBackend.repository.ProductRepository;
+import com.Marketly.MarketlyBackend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,6 +33,8 @@ public class ProductServiceImpl implements ProductService{
     private ModelMapper modelMapper;
     @Autowired
     CategoryRepository categoryRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public ProductResponseDTO getProductsByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
@@ -50,15 +55,18 @@ public class ProductServiceImpl implements ProductService{
         return response;
     }
     @Override
-    public ProductDTO addProduct(ProductDTO productDTO,Long categoryId) {
+    @Transactional
+    public ProductDTO addProduct(ProductDTO productDTO,Long categoryId,String sellerName) {
         Category category=categoryRepository.findById(categoryId).orElseThrow(()->new ResourceNotFoundException("Category","categoryId",categoryId));
-         List<Product>products=category.getProducts();
-          for(int id=0;id<products.size();id++){
-               if(products.get(id).getProductName().equals(productDTO.getProductName())) throw new ApiException("A product with catgoryId : "+categoryId + "and productName : "+ productDTO.getProductName() + "already exists!!");
+         boolean exits=productRepository.existsByProductNameAndCategory(productDTO.getProductName(),category);
+          if(exits){
+               throw new ApiException("Product with categoryId: "+categoryId +" and  productName "+ productDTO.getProductName()+" already exists");
           }
+        User seller=userRepository.findByUserName(sellerName).orElseThrow(()-> new ResourceNotFoundException("User","userName",sellerName));
         Product product=modelMapper.map(productDTO,Product.class);
         product.setCategory(category);
         product.setSpecialPrice(DefaultValues.getSpecialPrice(productDTO.getPrice(),productDTO.getDiscount()));
+        product.setUser(seller);
         Product savedProduct=productRepository.save(product);
          return modelMapper.map(savedProduct,ProductDTO.class);
     }
@@ -102,14 +110,22 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
+    @Transactional
     public ProductDTO updateProduct(ProductDTO productDTO, Long productId) {
           Product existingProduct=productRepository.findById(productId).orElseThrow(()->new ResourceNotFoundException("Product","ProductId",productId));
-          existingProduct.setProductName(productDTO.getProductName());
-          existingProduct.setDescription(productDTO.getDescription());
-          existingProduct.setDiscount(productDTO.getDiscount());
-          existingProduct.setPrice(productDTO.getPrice());
-          existingProduct.setQuantity(productDTO.getQuantity());
-          existingProduct.setSpecialPrice(DefaultValues.getSpecialPrice(productDTO.getPrice(),productDTO.getDiscount()));
+       if(productDTO.getDescription()!=null)    existingProduct.setDescription(productDTO.getDescription());
+       if(productDTO.getStocks()!=null) existingProduct.setStocks(productDTO.getStocks());
+       long newPrice=existingProduct.getPrice();
+        long newDiscount=existingProduct.getDiscount();
+       if(productDTO.getPrice()!=null){
+           existingProduct.setPrice(productDTO.getPrice());
+           newPrice=productDTO.getPrice();
+       }
+       if(productDTO.getDiscount()!=null) {
+           existingProduct.setDiscount(productDTO.getDiscount());
+          newDiscount=productDTO.getDiscount();
+       }
+          existingProduct.setSpecialPrice(DefaultValues.getSpecialPrice(newPrice,newDiscount));
           Product savedProduct=productRepository.save(existingProduct);
           return modelMapper.map(savedProduct,ProductDTO.class);
     }
@@ -128,5 +144,24 @@ public class ProductServiceImpl implements ProductService{
          productInDB.setImage(fileName);
          Product updatedProductwithImage=productRepository.save(productInDB);
           return modelMapper.map(updatedProductwithImage,ProductDTO.class);
+    }
+
+    @Override
+    public ProductResponseDTO getProductBySeller(String sellerName, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortingDetails=sortBy.equalsIgnoreCase("asc")?Sort.by(sortOrder).ascending():Sort.by(sortOrder).descending();
+        Pageable pageable=PageRequest.of(pageNumber,pageSize,sortingDetails);
+        Page<Product>productList=productRepository.findByUser_UserName(sellerName,pageable);
+        List<Product>products=productList.getContent();
+        if(products.isEmpty()) throw new ApiException("No products created till now with sellername : "+sellerName);
+        List<ProductDTO> productDTO = products.stream().map(elements -> modelMapper.map(elements, ProductDTO.class)).toList();
+        ProductResponseDTO response=new ProductResponseDTO();
+        response.setContent(productDTO);
+        response.setPageNumber(pageNumber);
+        response.setTotalPage(productList.getTotalPages());
+        response.setTotalElements(productList.getNumberOfElements());
+        response.setPageSize(productList.getSize());
+        response.setLastPage(productList.isLast());
+        response.setTotalPage(productList.getTotalPages());
+        return response;
     }
 }

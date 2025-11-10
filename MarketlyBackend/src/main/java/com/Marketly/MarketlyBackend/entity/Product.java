@@ -20,13 +20,13 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private  Long productId;
     private String productName;
-    private Long quantity;
     private Long price;
     private Long specialPrice;
     private String description;
     private String image;
     private Long discount;
-
+    private Long stocks;
+    private String brandName;
      @ToString.Exclude
      @ManyToOne
      @JoinColumn(name = "category_id")
@@ -34,5 +34,4 @@ public class Product {
      @ManyToOne
     @JoinColumn(name = "seller_id")
     private User user;
-
 }
